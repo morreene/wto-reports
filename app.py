@@ -1,4 +1,4 @@
-"""
+# """
 This app creates a responsive sidebar layout with dash-bootstrap-components and
 some custom css with media queries.
 
@@ -20,11 +20,11 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
-import pandas as pd
-import dash_table
-
-# df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv')
-df = pd.read_csv('gapminder2007.csv')
+# import pandas as pd
+# import dash_table
+#
+# # df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv')
+# df = pd.read_csv('gapminder2007.csv')
 
 
 app = dash.Dash(
