@@ -1,98 +1,176 @@
+"""
+This app creates a responsive sidebar layout with dash-bootstrap-components and
+some custom css with media queries.
+
+When the screen is small, the sidebar moved to the top of the page, and the
+links get hidden in a collapse element. We use a callback to toggle the
+collapse when on a small screen, and the custom CSS to hide the toggle, and
+force the collapse to stay open when the screen is large.
+
+dcc.Location is used to track the current location. There are two callbacks,
+one uses the current location to render the appropriate page content, the other
+uses the current location to toggle the "active" properties of the navigation
+links.
+
+For more details on building multi-page Dash applications, check out the Dash
+documentation: https://dash.plot.ly/urls
+"""
 import dash
-from dash.dependencies import Input, Output
-import dash_table
+import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
+from dash.dependencies import Input, Output, State
 import pandas as pd
+import dash_table
 
-df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv')
+# df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv')
+df = pd.read_csv('gapminder2007.csv')
 
-app = dash.Dash(__name__)
 
-app.layout = html.Div([
-    dash_table.DataTable(
-        id='datatable-interactivity',
-        columns=[
-            {"name": i, "id": i, "deletable": True, "selectable": True} for i in df.columns
-        ],
-        data=df.to_dict('records'),
-        editable=True,
-        filter_action="native",
-        sort_action="native",
-        sort_mode="multi",
-        column_selectable="single",
-        row_selectable="multi",
-        row_deletable=True,
-        selected_columns=[],
-        selected_rows=[],
-        page_action="native",
-        page_current= 0,
-        page_size= 10,
-    ),
-    html.Div(id='datatable-interactivity-container')
-])
-
-@app.callback(
-    Output('datatable-interactivity', 'style_data_conditional'),
-    [Input('datatable-interactivity', 'selected_columns')]
+app = dash.Dash(
+    external_stylesheets=[dbc.themes.BOOTSTRAP],
+    # these meta_tags ensure content is scaled correctly on different devices
+    # see: https://www.w3schools.com/css/css_rwd_viewport.asp for more
+    meta_tags=[
+        {"name": "viewport", "content": "width=device-width, initial-scale=1"}
+    ],
 )
-def update_styles(selected_columns):
-    return [{
-        'if': { 'column_id': i },
-        'background_color': '#D2F3FF'
-    } for i in selected_columns]
+
+# we use the Row and Col components to construct the sidebar header
+# it consists of a title, and a toggle, the latter is hidden on large screens
+sidebar_header = dbc.Row(
+    [
+        dbc.Col(html.H2("Reports", className="display-4")),
+        dbc.Col(
+            html.Button(
+                # use the Bootstrap navbar-toggler classes to style the toggle
+                html.Span(className="navbar-toggler-icon"),
+                className="navbar-toggler",
+                # the navbar-toggler classes don't set color, so we do it here
+                style={
+                    "color": "rgba(0,0,0,.5)",
+                    "border-color": "rgba(0,0,0,.1)",
+                },
+                id="toggle",
+            ),
+            # the column containing the toggle will be only as wide as the
+            # toggle, resulting in the toggle being right aligned
+            width="auto",
+            # vertically align the toggle in the center
+            align="center",
+        ),
+    ]
+)
+
+sidebar = html.Div(
+    [
+        sidebar_header,
+        # we wrap the horizontal rule and short blurb in a div that can be
+        # hidden on a small screen
+        html.Div(
+            [
+                html.Hr(),
+                html.P(
+                    "A responsive sidebar layout with collapsible navigation "
+                    "links.",
+                    className="lead",
+                ),
+            ],
+            id="blurb",
+        ),
+        # use the Collapse component to animate hiding / revealing links
+        dbc.Collapse(
+            dbc.Nav(
+                [
+                    dbc.NavLink("TPR Reports", href="/page-1", id="page-1-link"),
+                    dbc.NavLink("Charts", href="/page-2", id="page-2-link"),
+                    dbc.NavLink("Help", href="/page-3", id="page-3-link"),
+                ],
+                vertical=True,
+                pills=True,
+            ),
+            id="collapse",
+        ),
+    ],
+    id="sidebar",
+)
+
+content = html.Div(id="page-content")
+
+app.layout = html.Div([dcc.Location(id="url"), sidebar, content])
+
+
+# this callback uses the current pathname to set the active state of the
+# corresponding nav link to true, allowing users to tell see page they are on
+@app.callback(
+    [Output(f"page-{i}-link", "active") for i in range(1, 4)],
+    [Input("url", "pathname")],
+)
+def toggle_active_links(pathname):
+    if pathname == "/":
+        # Treat page 1 as the homepage / index
+        return True, False, False
+    return [pathname == f"/page-{i}" for i in range(1, 4)]
+
+
+@app.callback(Output("page-content", "children"), [Input("url", "pathname")])
+def render_page_content(pathname):
+    if pathname in ["/", "/page-1"]:
+        return html.P(
+
+#
+# dash_table.DataTable(
+#         id='datatable-interactivity',
+#         columns=[
+#             {"name": i, "id": i, "deletable": False, "selectable": False} for i in df.columns
+#         ],
+#         data=df.to_dict('records'),
+#         editable=False,
+#         filter_action="native",
+#         sort_action="native",
+#         sort_mode="multi",
+#         column_selectable=False,
+#         row_selectable=False,
+#         row_deletable=False,
+#         selected_columns=[],
+#         selected_rows=[],
+#         page_action="native",
+#         page_current= 0,
+#         page_size= 10,
+#     )
+
+
+
+
+
+
+
+
+        )
+    elif pathname == "/page-2":
+        return html.P("This is the content of page 2. Yay!")
+    elif pathname == "/page-3":
+        return html.P("Oh cool, this is page 3!")
+    # If the user tries to reach a different page, return a 404 message
+    return dbc.Jumbotron(
+        [
+            html.H1("404: Not found", className="text-danger"),
+            html.Hr(),
+            html.P(f"The pathname {pathname} was not recognised..."),
+        ]
+    )
+
 
 @app.callback(
-    Output('datatable-interactivity-container', "children"),
-    [Input('datatable-interactivity', "derived_virtual_data"),
-     Input('datatable-interactivity', "derived_virtual_selected_rows")])
-def update_graphs(rows, derived_virtual_selected_rows):
-    # When the table is first rendered, `derived_virtual_data` and
-    # `derived_virtual_selected_rows` will be `None`. This is due to an
-    # idiosyncracy in Dash (unsupplied properties are always None and Dash
-    # calls the dependent callbacks when the component is first rendered).
-    # So, if `rows` is `None`, then the component was just rendered
-    # and its value will be the same as the component's dataframe.
-    # Instead of setting `None` in here, you could also set
-    # `derived_virtual_data=df.to_rows('dict')` when you initialize
-    # the component.
-    if derived_virtual_selected_rows is None:
-        derived_virtual_selected_rows = []
-
-    dff = df if rows is None else pd.DataFrame(rows)
-
-    colors = ['#7FDBFF' if i in derived_virtual_selected_rows else '#0074D9'
-              for i in range(len(dff))]
-
-    return [
-        dcc.Graph(
-            id=column,
-            figure={
-                "data": [
-                    {
-                        "x": dff["country"],
-                        "y": dff[column],
-                        "type": "bar",
-                        "marker": {"color": colors},
-                    }
-                ],
-                "layout": {
-                    "xaxis": {"automargin": True},
-                    "yaxis": {
-                        "automargin": True,
-                        "title": {"text": column}
-                    },
-                    "height": 250,
-                    "margin": {"t": 10, "l": 10, "r": 10},
-                },
-            },
-        )
-        # check if column exists - user may have deleted it
-        # If `column.deletable=False`, then you don't
-        # need to do this check.
-        for column in ["pop", "lifeExp", "gdpPercap"] if column in dff
-    ]
+    Output("collapse", "is_open"),
+    [Input("toggle", "n_clicks")],
+    [State("collapse", "is_open")],
+)
+def toggle_collapse(n, is_open):
+    if n:
+        return not is_open
+    return is_open
 
 
-if __name__ == '__main__':
-    app.run_server(debug=True)
+if __name__ == "__main__":
+    app.run_server(port=8888, debug=True)
