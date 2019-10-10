@@ -28,15 +28,24 @@ import dash_table
 # df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv')
 df = pd.read_csv('gapminder2007.csv')
 
+# app = dash.Dash(
+#     external_stylesheets=[dbc.themes.BOOTSTRAP],
+#     # external_stylesheets=['/assets/responsive-sidebar.css'],
+#     # these meta_tags ensure content is scaled correctly on different devices
+#     # see: https://www.w3schools.com/css/css_rwd_viewport.asp for more
+#     meta_tags=[
+#         {"name": "viewport", "content": "width=device-width, initial-scale=1"}
+#     ],
+# )
 
-app = dash.Dash(
-    external_stylesheets=[dbc.themes.BOOTSTRAP],
-    # these meta_tags ensure content is scaled correctly on different devices
-    # see: https://www.w3schools.com/css/css_rwd_viewport.asp for more
-    meta_tags=[
-        {"name": "viewport", "content": "width=device-width, initial-scale=1"}
-    ],
-)
+app = dash.Dash(__name__)
+
+external_stylesheets = ['https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css']
+
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+
+
+# href="/assets/responsive-sidebar.css
 
 server = app.server
 
