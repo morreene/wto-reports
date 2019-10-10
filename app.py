@@ -17,7 +17,7 @@ app.layout = html.Div([
         options=[{'label': i, 'value': i} for i in ['LA', 'NYC', 'MTL']],
         value='LA'
     ),
-    html.Div(id='display-value')
+    html.Div(id='display-value'),
         dcc.Graph(
             id='example-graph',
             figure={
