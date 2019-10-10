@@ -38,6 +38,8 @@ app = dash.Dash(
     ],
 )
 
+server = app.server
+
 # we use the Row and Col components to construct the sidebar header
 # it consists of a title, and a toggle, the latter is hidden on large screens
 sidebar_header = dbc.Row(
