@@ -26,7 +26,10 @@ import pandas as pd
 import dash_table
 
 # df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv')
-df = pd.read_csv('gapminder2007.csv')
+# df = pd.read_csv('gapminder2007.csv')
+
+df = pd.read_csv('data-tpr-20191003.zip', compression='zip')
+
 
 # app = dash.Dash(
 #     external_stylesheets=[dbc.themes.BOOTSTRAP],
@@ -38,14 +41,8 @@ df = pd.read_csv('gapminder2007.csv')
 #     ],
 # )
 
-app = dash.Dash(__name__)
-
 external_stylesheets = ['https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css']
-
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-
-
-# href="/assets/responsive-sidebar.css
 
 server = app.server
 
