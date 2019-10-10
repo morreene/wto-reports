@@ -23,7 +23,8 @@ from dash.dependencies import Input, Output, State
 import pandas as pd
 import dash_table
 
-df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv')
+# df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv')
+df = pd.read_csv('gapminder2007.csv')
 
 
 app = dash.Dash(
