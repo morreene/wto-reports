@@ -27,31 +27,19 @@ import dash_table
 
 # df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv')
 df = pd.read_csv('gapminder2007.csv')
-
 # df = pd.read_csv('data-tpr-20191003.zip', compression='zip')
 
-
-# app = dash.Dash(
-#     external_stylesheets=[dbc.themes.BOOTSTRAP],
-#     # external_stylesheets=['/assets/responsive-sidebar.css'],
-#     # these meta_tags ensure content is scaled correctly on different devices
-#     # see: https://www.w3schools.com/css/css_rwd_viewport.asp for more
-#     meta_tags=[
-#         {"name": "viewport", "content": "width=device-width, initial-scale=1"}
-#     ],
-# )
-
 external_stylesheets = ['https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css']
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+# with "__name__" local css under assets is also included
+app = dash.Dash(__name__, external_stylesheets = external_stylesheets)
 
 server = app.server
-
 app.config.suppress_callback_exceptions = True
 # we use the Row and Col components to construct the sidebar header
 # it consists of a title, and a toggle, the latter is hidden on large screens
 sidebar_header = dbc.Row(
     [
-        dbc.Col(html.H2("Reports", className="display-4")),
+        dbc.Col(html.H2("Reports", className="display-4000")),
         dbc.Col(
             html.Button(
                 # use the Bootstrap navbar-toggler classes to style the toggle
@@ -60,7 +48,7 @@ sidebar_header = dbc.Row(
                 # the navbar-toggler classes don't set color, so we do it here
                 style={
                     "color": "rgba(0,0,0,.5)",
-                    "border-color": "rgba(0,0,0,.1)",
+                    "bordercolor": "rgba(0,0,0,.1)",
                 },
                 id="toggle",
             ),
@@ -109,7 +97,6 @@ content = html.Div(id="page-content")
 
 app.layout = html.Div([dcc.Location(id="url"), sidebar, content])
 
-
 # this callback uses the current pathname to set the active state of the
 # corresponding nav link to true, allowing users to tell see page they are on
 @app.callback(
@@ -127,35 +114,31 @@ def toggle_active_links(pathname):
 def render_page_content(pathname):
     if pathname in ["/", "/page-1"]:
         return html.Div([
-
-dbc.Row(
-    [
-        dbc.Col([
-            html.H5('Country'),
-            dcc.Dropdown(
-                id='dropdown_1',
-                options=[{'label': i, 'value': i} for i in ['','China', 'Argentina', 'Belgium']],
-                # multi=True,
-                value=''
+            dbc.Row(
+                [
+                    dbc.Col([
+                        html.H5('Topic'),
+                        dcc.Dropdown(
+                            id='dropdown_1',
+                            options=[{'label': i, 'value': i} for i in ['Select','China', 'Argentina', 'Belgium']],
+                            # multi=True,
+                            value=''
+                        ),
+                    ], width=6, align="center"),
+                    dbc.Col(
+                        [
+                        html.H5('Country'),
+                        dcc.Dropdown(
+                            id='dropdown_2',
+                            options=[{'label': i, 'value': i} for i in ['All','Asia', 'Europe', 'Belgium']],
+                            value='All'
+                        ),
+                        ], width=6
+                    ),
+                ],
             ),
-        ], width=6, align="center"),
-        dbc.Col(
-            [
-            html.H5('Topic'),
-            dcc.Dropdown(
-                id='dropdown_2',
-                options=[{'label': i, 'value': i} for i in ['','Asia', 'Europe', 'Belgium']],
-                value=''
-            ),
-            ], width=6
-        ),
-    ],
-),
-
-
             html.Br(),
             html.Div(id='table-container')
-
         ])
 
     elif pathname == "/page-2":
@@ -171,8 +154,7 @@ dbc.Row(
         ]
     )
 
-
-
+# Page 1 dropdown control
 @app.callback(
     dash.dependencies.Output('table-container', 'children'),
     [dash.dependencies.Input('dropdown_1', 'value'),
@@ -180,10 +162,8 @@ dbc.Row(
     ])
 def display_table(dropdown_value_1, dropdown_value_2):
     dff = df[(df['country'].str.contains(dropdown_value_1)) &
-            df['continent'].str.contains(dropdown_value_2)]
-    return html.P([
-
-
+            (df['continent'].str.contains(dropdown_value_2))]
+    return html.Div([
             dash_table.DataTable(
                     id='tab',
                     columns=[
@@ -208,16 +188,6 @@ def display_table(dropdown_value_1, dropdown_value_2):
 
 
 
-
-
-
-
-
-
-
-
-
-
 @app.callback(
     Output("collapse", "is_open"),
     [Input("toggle", "n_clicks")],
@@ -227,7 +197,6 @@ def toggle_collapse(n, is_open):
     if n:
         return not is_open
     return is_open
-
 
 if __name__ == '__main__':
     app.run_server(debug=True)
