@@ -26,8 +26,62 @@ import pandas as pd
 import dash_table
 
 # df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv')
-df = pd.read_csv('gapminder2007.csv')
 # df = pd.read_csv('data-tpr-20191003.zip', compression='zip')
+# df = pd.read_csv('gapminder2007.csv')
+df = pd.read_csv('tpr-data-20191011.csv')
+# cat_list = list(df['Cat'].unique())
+cat_list = ['economic environment',
+ 'investment regime',
+ 'customs procedures',
+ 'customs valuation',
+ 'rules of origin',
+ 'mfn tariff',
+ 'preferential tariffs',
+ 'import prohibitions, restrictions, and licensing',
+ 'anti-dumping',
+ 'safeguard',
+ 'standards and other technical requirements',
+ 'taxes, charges, and levies',
+ 'export prohibitions',
+ 'export subsidies',
+ 'export finance, insurance, and guarantees',
+ 'incentives',
+ 'competition policy and price controls',
+ 'government procurement',
+ 'intellectual property',
+ 'agriculture',
+ 'manufacturing',
+ 'services',
+ 'wto',
+ 'import prohibition',
+ 'sanitary and phytosanitary',
+ 'competition',
+ 'energy',
+ 'trade policy objectives',
+ 'trade agreements and arrangements',
+ 'bound',
+ 'agricultural',
+ 'state trading',
+ 'fisheries',
+ 'general framework',
+ 'tariff exemptions',
+ 'internal taxes',
+ 'legal framework',
+ 'other charges affecting imports',
+ 'mining and energy',
+ 'tariff bindings',
+ 'countervailing',
+ 'investment policy',
+ 'legal and institutional framework',
+ 'preferential agreements',
+ 'agriculture, forestry, and fisheries',
+ 'anti-dumping, countervailing, and safeguard measures',
+ 'export support and promotion',
+ 'registration, customs procedures and requirements',
+ 'other measures affecting imports'
+  '',
+]
+country_list = ['','747#BWA#LSO#NAM#ZAF', '808', 'AGO', 'ALB', 'ARE', 'ARG', 'ARM', 'ATG#DMA#GRD#KNA#LCA#VCT', 'AUS', 'BDI#KEN#RWA#TZA#UGA', 'BEN#BFA#CIV#GNB#MLI#NER#SEN#TGO', 'BGD', 'BHR', 'BLZ', 'BOL', 'BRA', 'BRB', 'BRN', 'CAF#CMR#COG#GAB#TCD', 'CAN', 'CHE#LIE', 'CHL', 'CHN', 'COD', 'COL', 'CPV', 'CRI', 'DJI', 'DOM', 'EEC', 'EGY', 'FJI', 'GEO', 'GHA', 'GIN', 'GMB', 'GTM', 'GUY', 'HKG', 'HND', 'HTI', 'IDN', 'IND', 'ISL', 'ISR', 'JAM', 'JOR', 'JPN', 'KGZ', 'KHM', 'KOR', 'LKA', 'MAC', 'MAR', 'MDA', 'MDG', 'MDV', 'MEX', 'MMR', 'MNE', 'MNG', 'MOZ', 'MRT', 'MUS', 'MWI', 'MYS', 'NGA', 'NIC', 'NOR', 'NPL', 'NZL', 'OMN', 'PAK', 'PAN', 'PER', 'PHL', 'PRY', 'QAT', 'RUS', 'SAU', 'SGP', 'SLB', 'SLE', 'SLV', 'SUR', 'THA', 'TON', 'TPKM', 'TUN', 'TUR', 'UKR', 'URY', 'USA', 'VNM', 'VUT', 'ZMB']
 
 external_stylesheets = ['https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css']
 # with "__name__" local css under assets is also included
@@ -120,9 +174,10 @@ def render_page_content(pathname):
                         html.H5('Topic'),
                         dcc.Dropdown(
                             id='dropdown_1',
-                            options=[{'label': i, 'value': i} for i in ['Select','China', 'Argentina', 'Belgium']],
+                            # options=[{'label': i, 'value': i} for i in ['Select','China', 'Argentina', 'Belgium']],
+                            options=[{'label': i, 'value': i} for i in cat_list],
                             # multi=True,
-                            value=''
+                            value='economic environment'
                         ),
                     ], width=6, align="center"),
                     dbc.Col(
@@ -130,8 +185,8 @@ def render_page_content(pathname):
                         html.H5('Country'),
                         dcc.Dropdown(
                             id='dropdown_2',
-                            options=[{'label': i, 'value': i} for i in ['All','Asia', 'Europe', 'Belgium']],
-                            value='All'
+                            options=[{'label': i, 'value': i} for i in country_list],
+                            value=''
                         ),
                         ], width=6
                     ),
@@ -161,13 +216,19 @@ def render_page_content(pathname):
      dash.dependencies.Input('dropdown_2', 'value')
     ])
 def display_table(dropdown_value_1, dropdown_value_2):
-    dff = df[(df['country'].str.contains(dropdown_value_1)) &
-            (df['continent'].str.contains(dropdown_value_2))]
+    # dff = df
+    # if dropdown_value_1 == 'Select':
+    #     dff = df
+    # dff = df[(df['Cat'].str.contains(dropdown_value_1)) &
+    #         (df['ConcernedCountriesCode'].str.contains(dropdown_value_2))]
+    # dff = df[(df['Cat'].str.contains(dropdown_value_1))]
+    dff = df[(df['Cat'].str.contains(dropdown_value_1)) &
+            (df['Country'].str.contains(dropdown_value_2))]
     return html.Div([
             dash_table.DataTable(
                     id='tab',
                     columns=[
-                        {"name": i, "id": i, "deletable": False, "selectable": False} for i in df.columns
+                        {"name": i, "id": i, "deletable": False, "selectable": False} for i in dff.columns
                     ],
                     data = dff.to_dict('records'),
                     editable=False,
@@ -181,7 +242,25 @@ def display_table(dropdown_value_1, dropdown_value_2):
                     selected_rows=[],
                     page_action="native",
                     page_current= 0,
-                    page_size= 10,
+                    page_size= 20,
+    #                     style_data={
+    #     'whiteSpace': 'normal',
+    #     'height': 'auto'
+    # },
+        style_cell={
+        'height': 'auto',
+        'minWidth': '50px', 'maxWidth': '180px',
+        'whiteSpace': 'normal'
+    },
+                    # style_cell_conditional=[
+                    #         {'if': {'column_id': 'Text'},
+                    #          'width': '50%', 'height': 'auto'},
+                    #          ],
+    # style_cell={
+    #     'height': 'auto',
+    #     'minWidth': '0px', 'maxWidth': '180px',
+    #     'whiteSpace': 'normal'
+    # }
                 )
             ])
 
